@@ -1,5 +1,12 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
+from seat_classes import DEFAULT_SEAT_CLASS, is_valid_seat_class
+
+
+class SeatClassOut(BaseModel):
+    price: int
+    seats_available: int
+    description: str
 
 
 class FlightOut(BaseModel):
@@ -9,16 +16,21 @@ class FlightOut(BaseModel):
     departure_time: str
     arrival_time: str
     price: int
-    seats_available: int
-
-    class Config:
-        from_attributes = True
+    seat_classes: dict[str, SeatClassOut]
 
 
 class BookingRequest(BaseModel):
     user_id: int
     name: str
     flight_id: int
+    seat_class: str = DEFAULT_SEAT_CLASS
+
+    @field_validator("seat_class")
+    @classmethod
+    def validate_seat_class(cls, value: str) -> str:
+        if not is_valid_seat_class(value):
+            raise ValueError("Invalid seat class")
+        return value
 
 
 class BookingOut(BaseModel):
@@ -27,6 +39,7 @@ class BookingOut(BaseModel):
     flight_id: int
     status: str
     booking_time: str
+    seat_class: str
 
     class Config:
         from_attributes = True

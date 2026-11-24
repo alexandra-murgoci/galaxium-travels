@@ -1,17 +1,26 @@
-import type { Flight } from '../../types';
+import { useState } from 'react';
+import type { Flight, SeatClass } from '../../types';
 import { Card, Button } from '../common';
-import { Plane, Clock, DollarSign, Users } from 'lucide-react';
-import { formatCurrency, formatDate, formatTime, calculateDuration } from '../../utils/formatters';
+import { SeatClassSelector } from './SeatClassSelector';
+import { Plane, Clock } from 'lucide-react';
+import { formatDate, formatTime, calculateDuration } from '../../utils/formatters';
+import { getFirstAvailableClass } from '../../utils/seatClasses';
 import { motion } from 'framer-motion';
 
 interface FlightCardProps {
   flight: Flight;
-  onBook: (flight: Flight) => void;
+  onBook: (flight: Flight, seatClass: SeatClass) => void;
 }
 
 export const FlightCard = ({ flight, onBook }: FlightCardProps) => {
-  const isLowSeats = flight.seats_available <= 2;
-  const isSoldOut = flight.seats_available === 0;
+  const [pickedClass, setPickedClass] = useState<SeatClass | null>(null);
+  const firstAvailable = getFirstAvailableClass(flight);
+  const isSoldOut = firstAvailable === undefined;
+  // Use the picked class only while it still has seats (flights reload after booking)
+  const selectedClass =
+    pickedClass && flight.seat_classes[pickedClass].seats_available > 0
+      ? pickedClass
+      : firstAvailable;
 
   return (
     <motion.div
@@ -70,27 +79,17 @@ export const FlightCard = ({ flight, onBook }: FlightCardProps) => {
             </span>
           </div>
 
-          {/* Price */}
-          <div className="flex items-center gap-2">
-            <DollarSign size={16} className="text-alien-green" />
-            <span className="text-2xl font-bold text-star-white">
-              {formatCurrency(flight.price)}
-            </span>
-            <span className="text-sm text-star-white/60">per seat</span>
-          </div>
-
-          {/* Seats Available */}
-          <div className="flex items-center gap-2">
-            <Users size={16} className={isLowSeats ? 'text-solar-orange' : 'text-star-white/70'} />
-            <span className={`text-sm ${isLowSeats ? 'text-solar-orange font-semibold' : 'text-star-white/70'}`}>
-              {isSoldOut ? 'Sold Out' : `${flight.seats_available} seats available`}
-            </span>
-          </div>
+          {/* Seat classes: price and seats left per class */}
+          <SeatClassSelector
+            flight={flight}
+            value={selectedClass}
+            onChange={setPickedClass}
+          />
         </div>
 
         {/* Book Button */}
         <Button
-          onClick={() => onBook(flight)}
+          onClick={() => selectedClass && onBook(flight, selectedClass)}
           disabled={isSoldOut}
           className="w-full"
         >

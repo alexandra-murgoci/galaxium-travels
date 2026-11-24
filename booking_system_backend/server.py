@@ -19,7 +19,7 @@ mcp = FastMCP("Galaxium Booking System")
 @mcp.tool()
 def list_flights() -> list[FlightOut]:
     """List all available flights.
-    Returns a list of flights with origin, destination, times, price, and seats available."""
+    Returns a list of flights with origin, destination, times, base price, and seat classes (economy, business, galaxium) with per-class pricing and seat availability."""
     db = SessionLocal()
     try:
         return flight.list_flights(db)
@@ -28,14 +28,15 @@ def list_flights() -> list[FlightOut]:
 
 
 @mcp.tool()
-def book_flight(user_id: int, name: str, flight_id: int) -> BookingOut:
-    """Book a seat on a specific flight for a user.
-    Requires user_id, name, and flight_id.
-    Decrements available seats if successful.
+def book_flight(user_id: int, name: str, flight_id: int, seat_class: str = "economy") -> BookingOut:
+    """Book a seat on a specific flight for a user in the requested seat class.
+    Available seat classes are 'economy' (default, 1.5x base price), 'business' (2.5x base price), and 'galaxium' (3.0x base price).
+    Requires user_id, name, and flight_id. Optional seat_class defaults to 'economy'.
+    Decrements available seats for the selected class if successful.
     Returns booking details or raises an error if booking is not possible."""
     db = SessionLocal()
     try:
-        result = booking.book_flight(db, user_id, name, flight_id)
+        result = booking.book_flight(db, user_id, name, flight_id, seat_class=seat_class)
         if isinstance(result, ErrorResponse):
             raise Exception(result.details or result.error)
         return result
@@ -144,11 +145,19 @@ def get_flights(db: Session = Depends(get_db)):
 
 @app.post("/book", response_model=Union[BookingOut, ErrorResponse], tags=["Bookings"])
 def book_flight_endpoint(request: BookingRequest, db: Session = Depends(get_db)):
-    """Book a seat on a specific flight for a user.
+    """Book a seat on a specific flight for a user in the requested seat class.
 
-    Requires user_id, name, and flight_id. Decrements available seats if successful.
+    Available seat classes are 'economy' (default), 'business', and 'galaxium'.
+    Requires user_id, name, and flight_id. Optional seat_class defaults to 'economy'.
+    Decrements available seats for the selected class if successful.
     """
-    return booking.book_flight(db, request.user_id, request.name, request.flight_id)
+    return booking.book_flight(
+        db,
+        request.user_id,
+        request.name,
+        request.flight_id,
+        seat_class=request.seat_class,
+    )
 
 
 @app.get("/bookings/{user_id}", response_model=list[BookingOut], tags=["Bookings"])

@@ -9,6 +9,7 @@ A modern, space-themed frontend for the Galaxium Travels interplanetary booking 
 - **Real-time Updates**: Live flight availability and booking status
 - **User Management**: Simple name/email authentication
 - **Flight Booking**: Browse, search, and book interplanetary flights
+- **Seat Classes**: Choose Economy, Business, or Galaxium per booking, with per-class prices and seats left
 - **Booking Management**: View and cancel your bookings
 - **Toast Notifications**: User-friendly feedback for all actions
 - **Smooth Animations**: Framer Motion powered transitions
@@ -84,7 +85,8 @@ src/
 │   │   ├── Footer.tsx
 │   │   └── Layout.tsx
 │   ├── flights/         # Flight-related components
-│   │   └── FlightCard.tsx
+│   │   ├── FlightCard.tsx
+│   │   └── SeatClassSelector.tsx
 │   ├── bookings/        # Booking-related components
 │   │   ├── BookingCard.tsx
 │   │   └── BookingModal.tsx
@@ -101,7 +103,8 @@ src/
 ├── hooks/               # Custom React hooks
 │   └── useUser.tsx
 ├── utils/               # Utility functions
-│   └── formatters.ts
+│   ├── formatters.ts
+│   └── seatClasses.ts
 ├── App.tsx              # Main app component
 ├── main.tsx             # Entry point
 └── index.css            # Global styles
@@ -133,7 +136,7 @@ The frontend connects to the backend API with the following endpoints:
 - `GET /flights` - List all flights
 - `POST /register` - Register new user
 - `GET /user?name=...&email=...` - Get user by credentials
-- `POST /book` - Book a flight
+- `POST /book` - Book a flight (optional `seat_class`: `economy` | `business` | `galaxium`, defaults to `economy`)
 - `GET /bookings/{user_id}` - Get user's bookings
 - `POST /cancel/{booking_id}` - Cancel a booking
 
@@ -142,10 +145,11 @@ The frontend connects to the backend API with the following endpoints:
 ### Booking a Flight
 
 1. Browse available flights on the Flights page
-2. Click "Book Now" on desired flight
-3. Sign in or register (if not already logged in)
-4. Confirm booking details
-5. Receive confirmation and view in My Bookings
+2. Pick a seat class on the flight card (sold-out classes are disabled; a flight shows "Sold Out" only when all classes are sold out)
+3. Click "Book Now" on desired flight
+4. Sign in or register (if not already logged in)
+5. Confirm booking details (the seat class can still be changed in the modal; the total reflects the class price)
+6. Receive confirmation and view in My Bookings
 
 ### Managing Bookings
 

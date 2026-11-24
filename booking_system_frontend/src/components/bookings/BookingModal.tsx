@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import type { Flight } from '../../types';
+import type { Flight, SeatClass } from '../../types';
 import { Modal, Button } from '../common';
+import { SeatClassSelector } from '../flights/SeatClassSelector';
 import { Plane, Calendar, Clock, DollarSign } from 'lucide-react';
 import { formatCurrency, formatDate, calculateDuration } from '../../utils/formatters';
+import { SEAT_CLASS_LABELS } from '../../utils/seatClasses';
 import { bookFlight, isErrorResponse } from '../../services/api';
 import { useUser } from '../../hooks/useUser';
 import toast from 'react-hot-toast';
@@ -11,10 +13,19 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   flight: Flight | null;
+  seatClass: SeatClass;
+  onSeatClassChange: (seatClass: SeatClass) => void;
   onSuccess: () => void;
 }
 
-export const BookingModal = ({ isOpen, onClose, flight, onSuccess }: BookingModalProps) => {
+export const BookingModal = ({
+  isOpen,
+  onClose,
+  flight,
+  seatClass,
+  onSeatClassChange,
+  onSuccess,
+}: BookingModalProps) => {
   const { user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,6 +44,7 @@ export const BookingModal = ({ isOpen, onClose, flight, onSuccess }: BookingModa
         user_id: user.user_id,
         name: user.name,
         flight_id: flight.flight_id,
+        seat_class: seatClass,
       });
 
       if (isErrorResponse(result)) {
@@ -110,6 +122,17 @@ export const BookingModal = ({ isOpen, onClose, flight, onSuccess }: BookingModa
           </div>
         </div>
 
+        {/* Seat Class */}
+        <div>
+          <h4 className="text-sm font-semibold text-star-white mb-2">Seat Class</h4>
+          <SeatClassSelector
+            flight={flight}
+            value={seatClass}
+            onChange={onSeatClassChange}
+            showDescription
+          />
+        </div>
+
         {/* Passenger Info */}
         {user && (
           <div className="glass-card p-4 bg-white/5">
@@ -125,10 +148,12 @@ export const BookingModal = ({ isOpen, onClose, flight, onSuccess }: BookingModa
         <div className="flex items-center justify-between p-4 glass-card bg-cosmic-gradient">
           <div className="flex items-center gap-2">
             <DollarSign className="text-white" size={24} />
-            <span className="text-white font-semibold">Total Price</span>
+            <span className="text-white font-semibold">
+              Total Price ({SEAT_CLASS_LABELS[seatClass]})
+            </span>
           </div>
           <span className="text-2xl font-bold text-white">
-            {formatCurrency(flight.price)}
+            {formatCurrency(flight.seat_classes[seatClass].price)}
           </span>
         </div>
 

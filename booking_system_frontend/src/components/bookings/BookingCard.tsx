@@ -2,6 +2,7 @@ import type { Booking, Flight } from '../../types';
 import { Card, Button } from '../common';
 import { Plane, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { formatDate, formatCurrency } from '../../utils/formatters';
+import { SEAT_CLASS_LABELS } from '../../utils/seatClasses';
 import { motion } from 'framer-motion';
 
 interface BookingCardProps {
@@ -92,15 +93,20 @@ export const BookingCard = ({ booking, flight, onCancel, isCancelling }: Booking
             </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-white/10">
-              <span className="text-sm text-star-white/60">Price</span>
+              <span className="text-sm text-star-white/60">
+                Price ({SEAT_CLASS_LABELS[booking.seat_class]})
+              </span>
               <span className="text-lg font-bold text-star-white">
-                {formatCurrency(flight.price)}
+                {formatCurrency(flight.seat_classes[booking.seat_class].price)}
               </span>
             </div>
           </div>
         ) : (
           <div className="mb-4">
             <p className="text-sm text-star-white/60">Flight ID: {booking.flight_id}</p>
+            <p className="text-sm text-star-white/60">
+              Seat Class: {SEAT_CLASS_LABELS[booking.seat_class]}
+            </p>
           </div>
         )}
 

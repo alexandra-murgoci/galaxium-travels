@@ -85,7 +85,9 @@ def sample_flight_data():
         "departure_time": "2099-01-01T09:00:00Z",
         "arrival_time": "2099-01-01T17:00:00Z",
         "price": 1000000,
-        "seats_available": 5
+        "seats_economy": 3,
+        "seats_business": 1,
+        "seats_galaxium": 1
     }
 
 

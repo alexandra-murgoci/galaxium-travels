@@ -6,6 +6,7 @@ A complete full-stack application for booking interplanetary space travel, featu
 
 - **Modern Space-Themed UI** - Beautiful, responsive interface with animated starfield
 - **Full Booking System** - Browse flights, make bookings, manage reservations
+- **Seat Classes** - Choose Economy, Business, or Galaxium, each with its own price and seat inventory
 - **Dual Protocol Backend** - REST API and MCP (Model Context Protocol) support
 - **Type-Safe** - Full TypeScript frontend and Python type hints
 - **Real-Time Updates** - Live flight availability and booking status
@@ -109,16 +110,31 @@ See [booking_system_frontend/README.md](booking_system_frontend/README.md) for:
 
 1. **Browse Flights** - Navigate to the Flights page to see all available routes
 2. **Search & Filter** - Use the search bar to find specific destinations
-3. **Sign In/Register** - Click "Book Now" and enter your name and email
-4. **Confirm Booking** - Review flight details and confirm your reservation
-5. **Manage Bookings** - View and cancel bookings from "My Bookings" page
+3. **Choose a Seat Class** - Pick Economy, Business, or Galaxium (sold-out classes are disabled)
+4. **Sign In/Register** - Click "Book Now" and enter your name and email
+5. **Confirm Booking** - Review flight details, seat class and class price, then confirm your reservation
+6. **Manage Bookings** - View and cancel bookings from "My Bookings" page
+
+### Seat Classes
+
+Each flight has a base price and a separate seat inventory per class. The class price is the base price multiplied by the class multiplier (rounded to an integer):
+
+| Class | Price multiplier |
+|-------|------------------|
+| Economy | 1.5x |
+| Business | 2.5x |
+| Galaxium | 3x |
+
+`seat_class` is optional when booking and defaults to `economy`. Cancelling a booking returns the seat to its class.
 
 ### Demo Data
 
 The system comes pre-seeded with:
 - **10 Users** - Alice, Bob, Charlie, Diana, Eve, Frank, Grace, Heidi, Ivan, Judy
-- **10 Flights** - Routes between Earth, Mars, Moon, Venus, Jupiter, Europa, Pluto
-- **20 Sample Bookings** - Various booking statuses
+- **10 Flights** - Routes between Earth, Mars, Moon, Venus, Jupiter, Europa, Pluto, each with Economy, Business and Galaxium seats
+- **20 Sample Bookings** - Various booking statuses and seat classes
+
+> **Upgrading from an older version:** if you have a `booking_system_backend/booking.db` created before seat classes were added, stop the backend and delete it so it is recreated with the new schema (there is no migration).
 
 ## 🛠️ Technology Stack
 
