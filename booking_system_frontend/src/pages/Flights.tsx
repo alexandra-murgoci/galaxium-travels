@@ -41,10 +41,24 @@ export const Flights = () => {
     setFilteredFlights(filtered);
   }, [searchTerm, flights]);
 
+  const loadFlightsWithRetry = async (retries: number = 3, delay: number = 1000): Promise<Flight[]> => {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        return await getFlights();
+      } catch (error) {
+        if (attempt === retries) {
+          throw error;
+        }
+        await new Promise((resolve) => setTimeout(resolve, delay * attempt));
+      }
+    }
+    throw new Error('Failed to fetch flights after retries');
+  };
+
   const loadFlights = async () => {
     setIsLoading(true);
     try {
-      const data = await getFlights();
+      const data = await loadFlightsWithRetry();
       setFlights(data);
       setFilteredFlights(data);
     } catch (error: any) {
@@ -170,5 +184,3 @@ export const Flights = () => {
     </div>
   );
 };
-
-// Made with Bob
